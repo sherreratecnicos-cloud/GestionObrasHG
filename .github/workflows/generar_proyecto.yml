@@ -1,0 +1,33 @@
+name: Generar Proyecto iOS 26
+
+on:
+  workflow_dispatch:       # Permite ejecución manual
+  push:
+    branches:
+      - main              # Ejecuta en push al branch main
+
+jobs:
+  build-and-generate:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout del repositorio
+        uses: actions/checkout@v4
+
+      - name: Configurar Swift (opcional)
+        uses: fwal/setup-swift@v2
+        with:
+          swift-version: '6.3' # Ajusta según versión compatible con iOS 26
+
+      - name: Ejecutar script de generación
+        run: |
+          chmod +x ./generar_proyecto.sh
+          ./generar_proyecto.sh
+
+      - name: Añadir archivos generados al repositorio
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add GestionObrasHG
+          git commit -m "📦 Archivos del proyecto generados automáticamente"
+          git push
