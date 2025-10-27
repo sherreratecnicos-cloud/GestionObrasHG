@@ -1,7 +1,13 @@
 name: Generar Proyecto iOS 26
 
 on:
-  workflow_dispatch:
+  workflow_dispatch:  # Permite ejecutar manualmente
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - 'GestionObrasHG/**'
+      - 'GestionObrasHG.zip'
 
 jobs:
   build-and-generate:
@@ -21,7 +27,7 @@ jobs:
           chmod +x ./generar_proyecto.sh
           ./generar_proyecto.sh
 
-      - name: Subir ZIP como artifact
+      - name: Subir ZIP del proyecto como artifact
         uses: actions/upload-artifact@v4
         with:
           name: GestionObrasHG
