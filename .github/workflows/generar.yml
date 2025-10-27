@@ -1,0 +1,28 @@
+name: Generar Proyecto iOS 26
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-and-generate:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout del repositorio
+        uses: actions/checkout@v4
+
+      - name: Mostrar versiones de Xcode y Swift
+        run: |
+          xcodebuild -version
+          swift --version
+
+      - name: Ejecutar script de generación
+        run: |
+          chmod +x ./generar_proyecto.sh
+          ./generar_proyecto.sh
+
+      - name: Subir ZIP como artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: GestionObrasHG
+          path: GestionObrasHG.zip
