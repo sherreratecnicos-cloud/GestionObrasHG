@@ -1,17 +1,22 @@
 name: Generar Proyecto iOS 26
 
 on:
-  workflow_dispatch:
+  workflow_dispatch:  # ejecución manual
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - 'GestionObrasHG/**'
+      - 'GestionObrasHG.zip'
 
 jobs:
   build-and-generate:
     runs-on: macos-latest
-
     steps:
-      - name: Checkout
+      - name: Checkout del repositorio
         uses: actions/checkout@v4
 
-      - name: Mostrar versión de Xcode y Swift
+      - name: Mostrar versiones de Xcode y Swift
         run: |
           xcodebuild -version
           swift --version
@@ -19,12 +24,19 @@ jobs:
       - name: Ejecutar script de generación
         run: |
           chmod +x ./generar_proyecto.sh
-          ./generar_proyecto.sh
+          set -e
+          ./generar_proyecto.sh || { echo "⚠️ Error ejecutando el script"; exit 1; }
 
-      - name: Commit y push
+      - name: Añadir ZIP al repositorio
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add GestionObrasHG.zip
+          git commit -m "📦 ZIP del proyecto generado automáticamente" || echo "No hay cambios"
+          git push
+
+      - name: Añadir carpeta del proyecto al repositorio (opcional)
+        run: |
           git add GestionObrasHG
-          git commit -m "📦 Archivos del proyecto generados automáticamente" || echo "No hay cambios"
+          git commit -m "📂 Archivos del proyecto generados automáticamente" || echo "No hay cambios"
           git push
