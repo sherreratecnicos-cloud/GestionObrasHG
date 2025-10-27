@@ -33,10 +33,10 @@ jobs:
           name: GestionObrasHG
           path: GestionObrasHG.zip
 
-      - name: Commit y push de archivos generados (opcional)
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add GestionObrasHG
-          git commit -m "📂 Archivos del proyecto generados automáticamente" || echo "No hay cambios"
-          git push
+      - name: Commit y push de archivos generados
+  run: |
+    git config user.name "github-actions[bot]"
+    git config user.email "github-actions[bot]@users.noreply.github.com"
+    git add GestionObrasHG
+    git commit -m "📂 Archivos del proyecto generados automáticamente" || echo "No hay cambios"
+    git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }} HEAD:main
