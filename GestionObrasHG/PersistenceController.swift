@@ -7,11 +7,11 @@ struct PersistenceController {
     init(inMemory: Bool = false) {
         container = NSPersistentContainer(name: "GestionObrasHG")
         if inMemory {
-            container.persistentStoreDescriptions.first?.url = URL(fileURLWithPath: "/dev/null")
+            container.persistentStoreDescriptions.first!.url = URL(fileURLWithPath: "/dev/null")
         }
-        container.loadPersistentStores { _, error in
-            if let error = error as NSError? {
-                fatalError("Error cargando CoreData: \(error), \(error.userInfo)")
+        container.loadPersistentStores { desc, error in
+            if let error = error {
+                fatalError("Error al cargar CoreData: \(error)")
             }
         }
     }
