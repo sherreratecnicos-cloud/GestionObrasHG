@@ -1,48 +1,45 @@
 #!/bin/bash
 set -e
 
-PROYECTO="GestionObrasHG"
-DESTINO="$HOME/Desktop/$PROYECTO"
+echo "🏗️  Generando estructura del proyecto GestionObrasHG..."
 
-echo "🧱 Creando proyecto $PROYECTO en $DESTINO..."
-rm -rf "$DESTINO"
-mkdir -p "$DESTINO"/{Models,Views,Helpers,Theme}
+# Crear carpeta principal
+mkdir -p GestionObrasHG/{Models,Views,Utils,Resources,Assets.xcassets}
 
-# =====================
-# ARCHIVO PRINCIPAL
-# =====================
-cat > "$DESTINO/GestionObrasHGApp.swift" <<'EOF'
+cd GestionObrasHG
+
+# Crear archivo principal SwiftUI
+cat > GestionObrasHGApp.swift << 'EOF'
 import SwiftUI
 
 @main
 struct GestionObrasHGApp: App {
     @StateObject private var datos = DatosObras()
+
     var body: some Scene {
         WindowGroup {
-            ObrasListView()
+            ListaObrasView()
                 .environmentObject(datos)
         }
     }
 }
 EOF
 
-# =====================
-# MODELOS
-# =====================
-cat > "$DESTINO/Models/Obra.swift" <<'EOF'
+# Ejemplo: modelo de datos
+cat > Models/Obra.swift << 'EOF'
 import Foundation
+
 struct Obra: Identifiable, Codable {
     var id = UUID()
     var nombre: String
-    var ubicacion: String
-    var descripcion: String
-    var imagen: String?
+    var direccion: String
     var visitas: [Visita] = []
 }
 EOF
 
-cat > "$DESTINO/Models/Visita.swift" <<'EOF'
+cat > Models/Visita.swift << 'EOF'
 import Foundation
+
 struct Visita: Identifiable, Codable {
     var id = UUID()
     var fecha: Date
@@ -52,8 +49,9 @@ struct Visita: Identifiable, Codable {
 }
 EOF
 
-cat > "$DESTINO/Models/Anotacion.swift" <<'EOF'
+cat > Models/Anotacion.swift << 'EOF'
 import Foundation
+
 struct Anotacion: Identifiable, Codable {
     var id = UUID()
     var texto: String
@@ -61,227 +59,95 @@ struct Anotacion: Identifiable, Codable {
 }
 EOF
 
-cat > "$DESTINO/Models/DatosObras.swift" <<'EOF'
+# Clase de datos compartida
+cat > Utils/DatosObras.swift << 'EOF'
 import Foundation
-import SwiftUI
 
-@MainActor
 class DatosObras: ObservableObject {
-    @Published var obras: [Obra] = [] {
-        didSet { guardar() }
-    }
-
-    private let ruta = FileManager.documentsDirectory.appendingPathComponent("obras.json")
-
-    init() { cargar() }
-
-    func cargar() {
-        guard let data = try? Data(contentsOf: ruta),
-              let decoded = try? JSONDecoder().decode([Obra].self, from: data)
-        else { return }
-        obras = decoded
-    }
-
-    func guardar() {
-        guard let data = try? JSONEncoder().encode(obras) else { return }
-        try? data.write(to: ruta, options: [.atomic, .completeFileProtection])
-    }
+    @Published var obras: [Obra] = []
 }
 EOF
 
-# =====================
-# HELPERS
-# =====================
-cat > "$DESTINO/Helpers/FileManager+Extensions.swift" <<'EOF'
-import UIKit
-extension FileManager {
-    static var documentsDirectory: URL {
-        FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
-    }
-}
-
-extension UIImage {
-    func saveToDocuments(named name: String) {
-        if let data = ImageCompressor.compress(self) {
-            let url = FileManager.documentsDirectory.appendingPathComponent(name)
-            try? data.write(to: url)
-        }
-    }
-
-    static func loadFromDocuments(_ name: String) -> UIImage? {
-        let url = FileManager.documentsDirectory.appendingPathComponent(name)
-        guard let data = try? Data(contentsOf: url) else { return nil }
-        return UIImage(data: data)
-    }
-}
-EOF
-
-cat > "$DESTINO/Helpers/ImageCompressor.swift" <<'EOF'
-import UIKit
-struct ImageCompressor {
-    static func compress(_ image: UIImage, maxKB: Int = 300) -> Data? {
-        var compression: CGFloat = 1.0
-        guard var data = image.jpegData(compressionQuality: compression) else { return nil }
-        while (data.count / 1024) > maxKB && compression > 0.1 {
-            compression -= 0.1
-            if let newData = image.jpegData(compressionQuality: compression) { data = newData }
-        }
-        return data
-    }
-}
-EOF
-
-cat > "$DESTINO/Helpers/PDFGenerator.swift" <<'EOF'
-import PDFKit
+# Tema de la app (colores HG)
+cat > Utils/AppTheme.swift << 'EOF'
 import SwiftUI
 
-struct PDFGenerator {
-    static func generarPDF(obra: Obra, visita: Visita? = nil) -> URL? {
-        let nombreArchivo = visita != nil ? "Visita-\(visita!.id).pdf" : "Obra-\(obra.id).pdf"
-        let url = FileManager.default.temporaryDirectory.appendingPathComponent(nombreArchivo)
-        let renderer = UIGraphicsPDFRenderer(bounds: CGRect(x: 0, y: 0, width: 595, height: 842))
-
-        do {
-            try renderer.writePDF(to: url) { ctx in
-                ctx.beginPage()
-                let titulo = visita != nil ? "Visita de obra" : "Informe completo de obra"
-                let attrs: [NSAttributedString.Key: Any] = [
-                    .font: UIFont.boldSystemFont(ofSize: 22),
-                    .foregroundColor: UIColor.red
-                ]
-                titulo.draw(at: CGPoint(x: 40, y: 40), withAttributes: attrs)
-            }
-            return url
-        } catch {
-            print("Error generando PDF:", error.localizedDescription)
-            return nil
-        }
-    }
-}
-EOF
-
-# =====================
-# THEME
-# =====================
-cat > "$DESTINO/Theme/AppTheme.swift" <<'EOF'
-import SwiftUI
 struct AppTheme {
-    static let colorPrincipal = Color(red: 0.8, green: 0.1, blue: 0.1)
-    static let colorFondo = Color(white: 0.95)
+    static let colorPrincipal = Color(red: 225/255, green: 6/255, blue: 0/255)
+    static let colorFondo = Color(red: 240/255, green: 240/255, blue: 240/255)
 }
 EOF
 
-# =====================
-# VISTAS
-# =====================
-cat > "$DESTINO/Views/ObrasListView.swift" <<'EOF'
+# Vista principal
+cat > Views/ListaObrasView.swift << 'EOF'
 import SwiftUI
 
-struct ObrasListView: View {
+struct ListaObrasView: View {
     @EnvironmentObject var datos: DatosObras
-    @State private var nuevaObra = false
+    @State private var mostrandoNuevaObra = false
 
     var body: some View {
         NavigationView {
             List {
                 ForEach(datos.obras) { obra in
-                    NavigationLink(destination: DetalleObraView(obra: binding(for: obra))) {
-                        VStack(alignment: .leading) {
-                            Text(obra.nombre).font(.headline)
-                            Text(obra.ubicacion).font(.subheadline).foregroundColor(.gray)
-                        }
+                    NavigationLink(destination: DetalleObraView(obra: obra)) {
+                        Text(obra.nombre)
+                            .font(.headline)
                     }
                 }
-                .onDelete { indices in datos.obras.remove(atOffsets: indices) }
+                .onDelete { indexSet in
+                    datos.obras.remove(atOffsets: indexSet)
+                }
             }
             .navigationTitle("Obras")
             .toolbar {
-                Button(action: { nuevaObra = true }) {
-                    Label("Añadir", systemImage: "plus")
-                }
-            }
-            .sheet(isPresented: $nuevaObra) {
-                EditarObraView { nueva in datos.obras.append(nueva) }
-            }
-        }
-    }
-
-    func binding(for obra: Obra) -> Binding<Obra> {
-        guard let index = datos.obras.firstIndex(where: { $0.id == obra.id }) else {
-            fatalError("Obra no encontrada")
-        }
-        return $datos.obras[index]
-    }
-}
-EOF
-
-cat > "$DESTINO/Views/DetalleObraView.swift" <<'EOF'
-import SwiftUI
-
-struct DetalleObraView: View {
-    @Binding var obra: Obra
-    @State private var nuevaVisita = false
-
-    var body: some View {
-        VStack {
-            List {
-                ForEach(obra.visitas) { visita in
-                    NavigationLink(destination: DetalleVisitaView(obra: $obra, visita: binding(for: visita))) {
-                        Text(visita.descripcion)
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button {
+                        mostrandoNuevaObra = true
+                    } label: {
+                        Image(systemName: "plus.circle.fill")
+                            .foregroundColor(AppTheme.colorPrincipal)
                     }
                 }
-                .onDelete { obra.visitas.remove(atOffsets: $0) }
             }
-            .toolbar {
-                Button(action: { nuevaVisita = true }) {
-                    Label("Añadir visita", systemImage: "plus")
+            .sheet(isPresented: $mostrandoNuevaObra) {
+                EditarObraView { nuevaObra in
+                    datos.obras.append(nuevaObra)
+                    mostrandoNuevaObra = false
                 }
             }
         }
-        .sheet(isPresented: $nuevaVisita) {
-            EditarVisitaView { nueva in obra.visitas.append(nueva) }
-        }
-        .navigationTitle(obra.nombre)
-    }
-
-    func binding(for visita: Visita) -> Binding<Visita> {
-        guard let index = obra.visitas.firstIndex(where: { $0.id == visita.id }) else {
-            fatalError("Visita no encontrada")
-        }
-        return $obra.visitas[index]
     }
 }
 EOF
 
-cat > "$DESTINO/Views/EditarObraView.swift" <<'EOF'
+# Vista para crear/editar obra
+cat > Views/EditarObraView.swift << 'EOF'
 import SwiftUI
 
 struct EditarObraView: View {
     @Environment(\.dismiss) var dismiss
     @State private var nombre = ""
-    @State private var ubicacion = ""
-    @State private var descripcion = ""
-
+    @State private var direccion = ""
     var onGuardar: (Obra) -> Void
 
     var body: some View {
         NavigationView {
             Form {
-                TextField("Nombre", text: $nombre)
-                TextField("Ubicación", text: $ubicacion)
-                TextField("Descripción", text: $descripcion)
+                TextField("Nombre de la obra", text: $nombre)
+                TextField("Dirección", text: $direccion)
             }
             .navigationTitle("Nueva Obra")
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Guardar") {
-                        let obra = Obra(nombre: nombre, ubicacion: ubicacion, descripcion: descripcion)
-                        onGuardar(obra)
+                        let nueva = Obra(nombre: nombre, direccion: direccion)
+                        onGuardar(nueva)
                         dismiss()
                     }
                 }
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancelar", action: { dismiss() })
+                    Button("Cancelar") { dismiss() }
                 }
             }
         }
@@ -289,10 +155,85 @@ struct EditarObraView: View {
 }
 EOF
 
-# =====================
-# ZIP FINAL
-# =====================
-cd "$HOME/Desktop"
-zip -r "${PROYECTO}.zip" "$PROYECTO" > /dev/null
-echo "📦 Proyecto completo listo: $HOME/Desktop/${PROYECTO}.zip"
-echo "✅ Abre el ZIP en Xcode 14.3, compila y prueba en simulador o genera IPA sin firmar."
+# Detalle de la obra
+cat > Views/DetalleObraView.swift << 'EOF'
+import SwiftUI
+
+struct DetalleObraView: View {
+    @State var obra: Obra
+    @EnvironmentObject var datos: DatosObras
+    @State private var mostrandoNuevaVisita = false
+
+    var body: some View {
+        List {
+            Section(header: Text("Visitas")) {
+                ForEach(obra.visitas) { visita in
+                    NavigationLink(destination: DetalleVisitaView(visita: visita)) {
+                        VStack(alignment: .leading) {
+                            Text(visita.fecha, style: .date)
+                                .font(.headline)
+                            Text(visita.descripcion)
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                }
+            }
+        }
+        .navigationTitle(obra.nombre)
+        .toolbar {
+            ToolbarItem(placement: .navigationBarTrailing) {
+                Button {
+                    mostrandoNuevaVisita = true
+                } label: {
+                    Image(systemName: "plus.circle.fill")
+                        .foregroundColor(AppTheme.colorPrincipal)
+                }
+            }
+        }
+        .sheet(isPresented: $mostrandoNuevaVisita) {
+            EditarVisitaView { nueva in
+                obra.visitas.append(nueva)
+                if let index = datos.obras.firstIndex(where: { $0.id == obra.id }) {
+                    datos.obras[index] = obra
+                }
+                mostrandoNuevaVisita = false
+            }
+        }
+    }
+}
+EOF
+
+# Info.plist
+cat > Info.plist << 'EOF'
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
+  "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>CFBundleDisplayName</key>
+  <string>GestionObrasHG</string>
+  <key>CFBundleIdentifier</key>
+  <string>com.hg.GestionObrasHG</string>
+  <key>CFBundleName</key>
+  <string>GestionObrasHG</string>
+  <key>UILaunchStoryboardName</key>
+  <string>Main</string>
+  <key>UIRequiresFullScreen</key>
+  <true/>
+  <key>UIStatusBarHidden</key>
+  <false/>
+  <key>UISupportedInterfaceOrientations</key>
+  <array>
+    <string>UIInterfaceOrientationPortrait</string>
+  </array>
+</dict>
+</plist>
+EOF
+
+# Crear proyecto Xcode
+xcodebuild -create-xcodeproj -projectName GestionObrasHG
+
+cd ..
+
+echo "✅ Proyecto GestionObrasHG generado correctamente."
+echo "📦 Listo para compilar o incluir en GitHub Actions."
