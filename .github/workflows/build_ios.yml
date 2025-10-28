@@ -1,98 +1,51 @@
-name: Build GestionObrasHG iOS
+name: 🏗️ Build iOS App (GestionObrasHG)
 
 on:
-  workflow_dispatch:
   push:
-    branches:
-      - main
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
 
 jobs:
-  build-ios:
-    name: Generar y compilar GestionObrasHG
+  build:
+    name: 🔨 Compilar proyecto iOS
     runs-on: macos-latest
 
     steps:
-      # 1️⃣ Descargar el código del repositorio
-      - name: Checkout del código
+      - name: 📦 Checkout del repositorio
         uses: actions/checkout@v4
 
-      # 2️⃣ Configurar versión estable de Xcode (15.4)
-      - name: Configurar Xcode 16.1
-        uses: maxim-lobanov/setup-xcode@v1
-        with:
-          xcode-version: '16.1'
+      - name: ⚙️ Seleccionar versión de Xcode
+        run: sudo xcode-select -s /Applications/Xcode_15.4.app/Contents/Developer
 
-      # 3️⃣ Verificar versión activa
-      - name: Comprobar versión de Xcode
-        run: |
-          echo "✅ Xcode configurado:"
-          xcodebuild -version
+      - name: 🔍 Verificar versión de Xcode
+        run: xcodebuild -version
 
-      # 4️⃣ Ejecutar el script de generación del proyecto
-      - name: Generar proyecto GestionObrasHG
+      - name: 🧱 Ejecutar script de generación del proyecto
         run: |
           chmod +x generar_proyecto.sh
           ./generar_proyecto.sh
 
-      # 5️⃣ Crear exportOptions.plist para exportar sin firmar
-      - name: Crear exportOptions.plist
-        run: |
-          cat <<EOF > exportOptions.plist
-          <?xml version="1.0" encoding="UTF-8"?>
-          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
-            "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-          <plist version="1.0">
-          <dict>
-            <key>method</key>
-            <string>developer-id</string>
-            <key>compileBitcode</key>
-            <false/>
-            <key>signingStyle</key>
-            <string>manual</string>
-            <key>stripSwiftSymbols</key>
-            <true/>
-            <key>teamID</key>
-            <string></string>
-            <key>thinning</key>
-            <string>&lt;none&gt;</string>
-          </dict>
-          </plist>
-          EOF
-
-      # 6️⃣ Compilar el proyecto para iOS (sin firmar)
-      - name: Compilar proyecto para iOS
+      - name: 🏗️ Compilar proyecto con xcodebuild
         run: |
           cd GestionObrasHG
           xcodebuild \
+            -project GestionObrasHG.xcodeproj \
             -scheme GestionObrasHG \
+            -sdk iphonesimulator \
             -configuration Release \
-            -sdk iphoneos \
-            -destination 'generic/platform=iOS' \
-            clean archive \
-            -archivePath build/Release-iphoneos/GestionObrasHG.xcarchive \
-            CODE_SIGN_IDENTITY="" \
-            CODE_SIGNING_REQUIRED=NO \
-            CODE_SIGNING_ALLOWED=NO
+            -derivedDataPath build
 
-      # 7️⃣ Exportar el .ipa sin firmar
-      - name: Generar archivo .ipa
+      - name: 📦 Crear archivo IPA (sin firmar)
         run: |
-          cd GestionObrasHG
-          mkdir -p build/ipa
-          xcodebuild \
-            -exportArchive \
-            -archivePath build/Release-iphoneos/GestionObrasHG.xcarchive \
-            -exportOptionsPlist ../exportOptions.plist \
-            -exportPath build/ipa \
-            CODE_SIGN_IDENTITY="" \
-            CODE_SIGNING_REQUIRED=NO \
-            CODE_SIGNING_ALLOWED=NO
+          mkdir -p output
+          cd GestionObrasHG/build/Build/Products/Release-iphonesimulator
+          zip -r ../../../output/GestionObrasHG-unsigned.ipa GestionObrasHG.app
+          echo "✅ IPA generado en output/GestionObrasHG-unsigned.ipa"
 
-          echo "✅ Archivo IPA generado en build/ipa"
-
-      # 8️⃣ Subir el .ipa como artefacto a GitHub
-      - name: Subir artefacto (.ipa)
+      - name: ⬆️ Subir IPA como artefacto
         uses: actions/upload-artifact@v4
         with:
-          name: GestionObrasHG-IPA
-          path: GestionObrasHG/build/ipa
+          name: GestionObrasHG-unsigned
+          path: GestionObrasHG/output/GestionObrasHG-unsigned.ipa
