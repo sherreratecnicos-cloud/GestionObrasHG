@@ -19,6 +19,37 @@ jobs:
           sudo xcode-select -s /Applications/Xcode_16.1.app
           xcodebuild -version
 
+      - name: Install XcodeGen
+        run: |
+          brew install xcodegen
+          xcodegen version
+
+      - name: Generate Xcode project
+        run: |
+          # Crear project.yml
+          cat > project.yml <<EOF
+          name: GestionObrasHG
+          options:
+            bundleIdPrefix: com.yourcompany
+            deploymentTarget:
+              iOS: '17.0'
+            developmentRegion: es
+          configs:
+            Release: release
+          targets:
+            GestionObrasHG:
+              type: application
+              platform: iOS
+              sources:
+                - path: GestionObrasHG
+              settings:
+                BASE_SDK: iphoneos
+                CODE_SIGNING_ALLOWED: NO
+          EOF
+
+          # Generar .xcodeproj
+          xcodegen generate
+
       - name: Clean Build Folder
         run: |
           xcodebuild clean \
