@@ -10,15 +10,16 @@ mkdir -p GestionObrasHG.xcodeproj
 
 cd GestionObrasHG
 
-# Crear Package.swift
+# Crear Package.swift actualizado a Swift 6
 cat > Package.swift <<'EOF'
+// swift-tools-version:6.0
 import PackageDescription
 
 let package = Package(
     name: "GestionObrasHG",
     platforms: [.iOS(.v17)],
     products: [
-        .executable(name: "GestionObrasHG", targets: ["GestionObrasHG"])
+        .library(name: "GestionObrasHG", targets: ["GestionObrasHG"])
     ],
     targets: [
         .target(
@@ -217,75 +218,75 @@ EOF
 
 cd ..
 
-# ✅ Crear pbxproj válido para Xcode e iOS 26
+# ✅ Crear pbxproj válido para Xcode 16+, Swift 6 y iOS 17
 cat > GestionObrasHG.xcodeproj/project.pbxproj <<'EOF'
 // !$*UTF8*$!
 {
-	archiveVersion = 1;
-	classes = {};
-	objectVersion = 56;
-	objects = {
-		1 /* App.swift */ = {isa = PBXFileReference; path = GestionObrasHG/App.swift; sourceTree = "<group>"; };
-		2 /* Models.swift */ = {isa = PBXFileReference; path = GestionObrasHG/Models/Models.swift; sourceTree = "<group>"; };
-		3 /* DataController.swift */ = {isa = PBXFileReference; path = GestionObrasHG/Models/DataController.swift; sourceTree = "<group>"; };
-		4 /* ListaObrasView.swift */ = {isa = PBXFileReference; path = GestionObrasHG/Views/ListaObrasView.swift; sourceTree = "<group>"; };
-		5 /* NuevaObraView.swift */ = {isa = PBXFileReference; path = GestionObrasHG/Views/NuevaObraView.swift; sourceTree = "<group>"; };
-		6 /* DetalleObraView.swift */ = {isa = PBXFileReference; path = GestionObrasHG/Views/DetalleObraView.swift; sourceTree = "<group>"; };
+    archiveVersion = 1;
+    classes = {};
+    objectVersion = 56;
+    objects = {
+        1 /* App.swift */ = {isa = PBXFileReference; path = GestionObrasHG/App.swift; sourceTree = "<group>"; };
+        2 /* Models.swift */ = {isa = PBXFileReference; path = GestionObrasHG/Models/Models.swift; sourceTree = "<group>"; };
+        3 /* DataController.swift */ = {isa = PBXFileReference; path = GestionObrasHG/Models/DataController.swift; sourceTree = "<group>"; };
+        4 /* ListaObrasView.swift */ = {isa = PBXFileReference; path = GestionObrasHG/Views/ListaObrasView.swift; sourceTree = "<group>"; };
+        5 /* NuevaObraView.swift */ = {isa = PBXFileReference; path = GestionObrasHG/Views/NuevaObraView.swift; sourceTree = "<group>"; };
+        6 /* DetalleObraView.swift */ = {isa = PBXFileReference; path = GestionObrasHG/Views/DetalleObraView.swift; sourceTree = "<group>"; };
 
-		10 /* GestionObrasHG.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; path = GestionObrasHG.app; sourceTree = BUILT_PRODUCTS_DIR; };
+        10 /* GestionObrasHG.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; path = GestionObrasHG.app; sourceTree = BUILT_PRODUCTS_DIR; };
 
-		20 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			files = (1, 2, 3, 4, 5, 6);
-		};
+        20 /* Sources */ = {
+            isa = PBXSourcesBuildPhase;
+            files = (1, 2, 3, 4, 5, 6);
+        };
 
-		30 /* GestionObrasHG */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = 31;
-			buildPhases = (20);
-			name = GestionObrasHG;
-			productName = GestionObrasHG;
-			productReference = 10;
-			productType = "com.apple.product-type.application";
-		};
+        30 /* GestionObrasHG */ = {
+            isa = PBXNativeTarget;
+            buildConfigurationList = 31;
+            buildPhases = (20);
+            name = GestionObrasHG;
+            productName = GestionObrasHG;
+            productReference = 10;
+            productType = "com.apple.product-type.application";
+        };
 
-		40 /* Project */ = {
-			isa = PBXProject;
-			buildConfigurationList = 41;
-			mainGroup = 50;
-			productRefGroup = 51;
-			targets = (30);
-			compatibilityVersion = "Xcode 16.0";
-		};
+        40 /* Project */ = {
+            isa = PBXProject;
+            buildConfigurationList = 41;
+            mainGroup = 50;
+            productRefGroup = 51;
+            targets = (30);
+            compatibilityVersion = "Xcode 16.0";
+        };
 
-		50 = {
-			isa = PBXGroup;
-			children = (1, 2, 3, 4, 5, 6);
-			sourceTree = "<group>";
-		};
+        50 = {
+            isa = PBXGroup;
+            children = (1, 2, 3, 4, 5, 6);
+            sourceTree = "<group>";
+        };
 
-		51 = {
-			isa = PBXGroup;
-			children = (10);
-			name = Products;
-			sourceTree = "<group>";
-		};
+        51 = {
+            isa = PBXGroup;
+            children = (10);
+            name = Products;
+            sourceTree = "<group>";
+        };
 
-		60 = {
-			isa = XCBuildConfiguration;
-			name = Release;
-			buildSettings = {
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = iphoneos;
-				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
-				SWIFT_VERSION = 5.0;
-				CODE_SIGNING_ALLOWED = NO;
-				CODE_SIGNING_REQUIRED = NO;
-			};
-		};
-	};
-	rootObject = 40;
+        60 = {
+            isa = XCBuildConfiguration;
+            name = Release;
+            buildSettings = {
+                PRODUCT_NAME = "$(TARGET_NAME)";
+                SDKROOT = iphoneos18.1;
+                IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+                SWIFT_VERSION = 5.8;
+                CODE_SIGNING_ALLOWED = NO;
+                CODE_SIGNING_REQUIRED = NO;
+            };
+        };
+    };
+    rootObject = 40;
 }
 EOF
 
-echo "✅ Proyecto Xcode válido para iOS 26 creado correctamente."
+echo "✅ Proyecto Xcode válido para iOS 17 y Swift 6 creado correctamente."
