@@ -20,11 +20,12 @@ jobs:
           xcodebuild -version
 
       - name: Clean Build Folder
-        run: xcodebuild clean \
-              -project GestionObrasHG.xcodeproj \
-              -scheme GestionObrasHG \
-              -configuration Release \
-              CODE_SIGNING_ALLOWED=NO
+        run: |
+          xcodebuild clean \
+            -project GestionObrasHG.xcodeproj \
+            -scheme GestionObrasHG \
+            -configuration Release \
+            CODE_SIGNING_ALLOWED=NO
 
       - name: Archive app
         run: |
