@@ -1,59 +1,64 @@
 name: Build iOS App
 
 on:
-  workflow_dispatch:        # Permite ejecutarlo manualmente desde GitHub
   push:
     branches:
-      - main                # O la rama que uses
+      - main
+  pull_request:
 
 jobs:
   build:
     runs-on: macos-latest
 
     steps:
-      - name: Checkout del código
-        uses: actions/checkout@v4
+      - name: Checkout repo
+        uses: actions/checkout@v3
 
-      - name: Configurar entorno de compilación
+      - name: Set up Xcode
         run: |
-          echo "Configurando entorno de iOS"
-          sudo xcode-select -s /Applications/Xcode_16.1.app/Contents/Developer
+          sudo xcode-select -s /Applications/Xcode_16.1.app
           xcodebuild -version
 
-      - name: Ejecutar script de generación del proyecto
-        run: |
-          chmod +x generar_proyecto.sh
-          ./generar_proyecto.sh
+      - name: Install dependencies
+        run: swift package resolve
 
-      - name: Compilar la app para iOS 16 (sin firmar)
+      - name: Clean Build Folder
+        run: xcodebuild clean -scheme GestionObrasHG -configuration Release CODE_SIGNING_ALLOWED=NO
+
+      - name: Archive app
         run: |
-          cd GestionObrasHG
-          xcodebuild \
+          mkdir -p build
+          xcodebuild archive \
             -scheme GestionObrasHG \
             -configuration Release \
-            -sdk iphoneos \
-            -destination 'generic/platform=iOS' \
-            clean build \
-            CODE_SIGN_IDENTITY="" \
-            CODE_SIGNING_REQUIRED=NO \
+            -archivePath ./build/GestionObrasHG.xcarchive \
             CODE_SIGNING_ALLOWED=NO
 
-      - name: Generar archivo .ipa sin firmar
+      - name: Export IPA
         run: |
-          mkdir -p build/ipa
-          xcodebuild \
-            -exportArchive \
-            -archivePath build/Release-iphoneos/GestionObrasHG.xcarchive \
-            -exportOptionsPlist exportOptions.plist \
-            -exportPath build/ipa \
-            CODE_SIGN_IDENTITY="" \
-            CODE_SIGNING_REQUIRED=NO \
-            CODE_SIGNING_ALLOWED=NO || true
+          cat > ExportOptions.plist <<EOF
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+              <key>method</key>
+              <string>development</string>
+              <key>signingStyle</key>
+              <string>none</string>
+          </dict>
+          </plist>
+          EOF
 
-          echo "✅ Archivo IPA generado en build/ipa"
+          xcodebuild -exportArchive \
+            -archivePath ./build/GestionObrasHG.xcarchive \
+            -exportOptionsPlist ExportOptions.plist \
+            -exportPath ./build/ipa
 
-      - name: Subir artefacto (.ipa)
+      - name: Upload IPA
         uses: actions/upload-artifact@v4
         with:
           name: GestionObrasHG-IPA
-          path: GestionObrasHG/build/ipa
+          path: build/ipa
+          if-no-files-found: warn
+          compression-level: 6
+          overwrite: true
