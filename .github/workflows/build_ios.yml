@@ -17,7 +17,7 @@ jobs:
       - name: Configurar entorno de compilación
         run: |
           echo "Configurando entorno de iOS"
-          sudo xcode-select -s /Applications/Xcode_14.3.app/Contents/Developer
+          sudo xcode-select -s /Applications/Xcode_16.1.app/Contents/Developer
           xcodebuild -version
 
       - name: Ejecutar script de generación del proyecto
