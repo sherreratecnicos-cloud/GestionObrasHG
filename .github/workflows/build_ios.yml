@@ -1,0 +1,92 @@
+name: Build GestionObrasHG iOS
+
+on:
+  workflow_dispatch:       # Permite lanzarlo manualmente desde GitHub
+  push:
+    branches:
+      - main               # Se ejecuta al hacer push a la rama principal
+
+jobs:
+  build-ios:
+    name: Generar y compilar proyecto iOS
+    runs-on: macos-latest
+
+    steps:
+      # 1️⃣ Descargar el código del repositorio
+      - name: Checkout del código
+        uses: actions/checkout@v4
+
+      # 2️⃣ Configurar Xcode 14.3
+      - name: Seleccionar versión de Xcode
+        run: |
+          sudo xcode-select -s /Applications/Xcode_14.3.app/Contents/Developer
+          xcodebuild -version
+
+      # 3️⃣ Ejecutar script de generación del proyecto
+      - name: Generar proyecto GestionObrasHG
+        run: |
+          chmod +x generar_proyecto.sh
+          ./generar_proyecto.sh
+
+      # 4️⃣ Crear archivo exportOptions.plist
+      - name: Crear exportOptions.plist
+        run: |
+          cat <<EOF > exportOptions.plist
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
+            "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+            <key>method</key>
+            <string>developer-id</string>
+            <key>compileBitcode</key>
+            <false/>
+            <key>signingStyle</key>
+            <string>manual</string>
+            <key>stripSwiftSymbols</key>
+            <true/>
+            <key>teamID</key>
+            <string></string>
+            <key>thinning</key>
+            <string>&lt;none&gt;</string>
+          </dict>
+          </plist>
+          EOF
+
+      # 5️⃣ Compilar la app para iOS (sin firmar)
+      - name: Compilar proyecto para iOS
+        run: |
+          cd GestionObrasHG
+          xcodebuild \
+            -scheme GestionObrasHG \
+            -configuration Release \
+            -sdk iphoneos \
+            -destination 'generic/platform=iOS' \
+            clean archive \
+            -archivePath build/Release-iphoneos/GestionObrasHG.xcarchive \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO
+
+      # 6️⃣ Generar archivo .ipa sin firmar
+      - name: Generar archivo .ipa
+        run: |
+          cd GestionObrasHG
+          mkdir -p build/ipa
+          xcodebuild \
+            -exportArchive \
+            -archivePath build/Release-iphoneos/GestionObrasHG.xcarchive \
+            -exportOptionsPlist ../exportOptions.plist \
+            -exportPath build/ipa \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO
+
+          echo "✅ Archivo IPA generado en build/ipa"
+
+      # 7️⃣ Subir el artefacto IPA a GitHub
+      - name: Subir artefacto (.ipa)
+        uses: actions/upload-artifact@v4
+        with:
+          name: GestionObrasHG-IPA
+          path: GestionObrasHG/build/ipa
