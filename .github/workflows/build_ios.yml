@@ -19,6 +19,12 @@ jobs:
           sudo xcode-select -s /Applications/Xcode_16.1.app
           xcodebuild -version
 
+      - name: Generate Xcode project
+        run: |
+          chmod +x scripts/generate_project.sh
+          bash scripts/generate_project.sh
+        # Asegúrate de que tu script genera GestionObrasHG.xcodeproj en la raíz de GestionObrasHG
+
       - name: Clean Build Folder
         run: |
           xcodebuild clean \
