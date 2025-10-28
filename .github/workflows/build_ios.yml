@@ -1,51 +1,59 @@
-name: 🏗️ Build iOS App (GestionObrasHG)
+name: Build iOS App
 
 on:
+  workflow_dispatch:        # Permite ejecutarlo manualmente desde GitHub
   push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
-  workflow_dispatch:
+    branches:
+      - main                # O la rama que uses
 
 jobs:
   build:
-    name: 🔨 Compilar proyecto iOS
     runs-on: macos-latest
 
     steps:
-      - name: 📦 Checkout del repositorio
+      - name: Checkout del código
         uses: actions/checkout@v4
 
-      - name: ⚙️ Seleccionar versión de Xcode
-        run: sudo xcode-select -s /Applications/Xcode_15.4.app/Contents/Developer
+      - name: Configurar entorno de compilación
+        run: |
+          echo "Configurando entorno de iOS"
+          sudo xcode-select -s /Applications/Xcode_14.3.app/Contents/Developer
+          xcodebuild -version
 
-      - name: 🔍 Verificar versión de Xcode
-        run: xcodebuild -version
-
-      - name: 🧱 Ejecutar script de generación del proyecto
+      - name: Ejecutar script de generación del proyecto
         run: |
           chmod +x generar_proyecto.sh
           ./generar_proyecto.sh
 
-      - name: 🏗️ Compilar proyecto con xcodebuild
+      - name: Compilar la app para iOS 16 (sin firmar)
         run: |
           cd GestionObrasHG
           xcodebuild \
-            -project GestionObrasHG.xcodeproj \
             -scheme GestionObrasHG \
-            -sdk iphonesimulator \
             -configuration Release \
-            -derivedDataPath build
+            -sdk iphoneos \
+            -destination 'generic/platform=iOS' \
+            clean build \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO
 
-      - name: 📦 Crear archivo IPA (sin firmar)
+      - name: Generar archivo .ipa sin firmar
         run: |
-          mkdir -p output
-          cd GestionObrasHG/build/Build/Products/Release-iphonesimulator
-          zip -r ../../../output/GestionObrasHG-unsigned.ipa GestionObrasHG.app
-          echo "✅ IPA generado en output/GestionObrasHG-unsigned.ipa"
+          mkdir -p build/ipa
+          xcodebuild \
+            -exportArchive \
+            -archivePath build/Release-iphoneos/GestionObrasHG.xcarchive \
+            -exportOptionsPlist exportOptions.plist \
+            -exportPath build/ipa \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO || true
 
-      - name: ⬆️ Subir IPA como artefacto
+          echo "✅ Archivo IPA generado en build/ipa"
+
+      - name: Subir artefacto (.ipa)
         uses: actions/upload-artifact@v4
         with:
-          name: GestionObrasHG-unsigned
-          path: GestionObrasHG/output/GestionObrasHG-unsigned.ipa
+          name: GestionObrasHG-IPA
+          path: GestionObrasHG/build/ipa
