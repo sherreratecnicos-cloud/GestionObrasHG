@@ -21,6 +21,7 @@ jobs:
 
       - name: Install dependencies
         run: swift package resolve
+        working-directory: GestionObrasHG/GestionObrasHG
 
       - name: Clean Build Folder
         run: xcodebuild clean -scheme GestionObrasHG -configuration Release CODE_SIGNING_ALLOWED=NO
