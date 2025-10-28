@@ -1,14 +1,14 @@
 name: Build GestionObrasHG iOS
 
 on:
-  workflow_dispatch:       # Permite lanzarlo manualmente desde GitHub
+  workflow_dispatch:
   push:
     branches:
-      - main               # Se ejecuta al hacer push a la rama principal
+      - main
 
 jobs:
   build-ios:
-    name: Generar y compilar proyecto iOS
+    name: Generar y compilar GestionObrasHG
     runs-on: macos-latest
 
     steps:
@@ -16,19 +16,25 @@ jobs:
       - name: Checkout del código
         uses: actions/checkout@v4
 
-      # 2️⃣ Configurar Xcode 14.3
-      - name: Seleccionar versión de Xcode
+      # 2️⃣ Configurar versión estable de Xcode (15.4)
+      - name: Configurar Xcode 15.4
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: '15.4'
+
+      # 3️⃣ Verificar versión activa
+      - name: Comprobar versión de Xcode
         run: |
-          sudo xcode-select -s /Applications/Xcode_14.3.app/Contents/Developer
+          echo "✅ Xcode configurado:"
           xcodebuild -version
 
-      # 3️⃣ Ejecutar script de generación del proyecto
+      # 4️⃣ Ejecutar el script de generación del proyecto
       - name: Generar proyecto GestionObrasHG
         run: |
           chmod +x generar_proyecto.sh
           ./generar_proyecto.sh
 
-      # 4️⃣ Crear archivo exportOptions.plist
+      # 5️⃣ Crear exportOptions.plist para exportar sin firmar
       - name: Crear exportOptions.plist
         run: |
           cat <<EOF > exportOptions.plist
@@ -53,7 +59,7 @@ jobs:
           </plist>
           EOF
 
-      # 5️⃣ Compilar la app para iOS (sin firmar)
+      # 6️⃣ Compilar el proyecto para iOS (sin firmar)
       - name: Compilar proyecto para iOS
         run: |
           cd GestionObrasHG
@@ -68,7 +74,7 @@ jobs:
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGNING_ALLOWED=NO
 
-      # 6️⃣ Generar archivo .ipa sin firmar
+      # 7️⃣ Exportar el .ipa sin firmar
       - name: Generar archivo .ipa
         run: |
           cd GestionObrasHG
@@ -84,7 +90,7 @@ jobs:
 
           echo "✅ Archivo IPA generado en build/ipa"
 
-      # 7️⃣ Subir el artefacto IPA a GitHub
+      # 8️⃣ Subir el .ipa como artefacto a GitHub
       - name: Subir artefacto (.ipa)
         uses: actions/upload-artifact@v4
         with:
