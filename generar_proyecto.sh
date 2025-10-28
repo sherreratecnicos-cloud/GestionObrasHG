@@ -6,10 +6,11 @@ echo "🏗️  Generando proyecto completo GestionObrasHG..."
 # Limpiar y crear estructura
 rm -rf GestionObrasHG
 mkdir -p GestionObrasHG/GestionObrasHG/{Models,Views,Assets.xcassets,Resources,PDFs}
+mkdir -p GestionObrasHG.xcodeproj
 
 cd GestionObrasHG
 
-# Crear Package.swift para estructura del proyecto
+# Crear Package.swift
 cat > Package.swift <<'EOF'
 import PackageDescription
 
@@ -28,7 +29,7 @@ let package = Package(
 )
 EOF
 
-# Archivo principal SwiftUI
+# App principal
 cat > GestionObrasHG/App.swift <<'EOF'
 import SwiftUI
 
@@ -116,7 +117,7 @@ class DataController: ObservableObject {
 }
 EOF
 
-# Lista de obras
+# Vista principal
 cat > GestionObrasHG/Views/ListaObrasView.swift <<'EOF'
 import SwiftUI
 
@@ -214,13 +215,77 @@ struct DetalleObraView: View {
 }
 EOF
 
-# ✅ Crear carpeta del proyecto Xcode antes del pbxproj
-mkdir -p GestionObrasHG.xcodeproj
+cd ..
 
-# Crear archivo pbxproj (mínimo para compilar sin error)
+# ✅ Crear pbxproj válido para Xcode e iOS 26
 cat > GestionObrasHG.xcodeproj/project.pbxproj <<'EOF'
-// Minimal Xcode project structure
-// Generated automatically by generar_proyecto.sh
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {};
+	objectVersion = 56;
+	objects = {
+		1 /* App.swift */ = {isa = PBXFileReference; path = GestionObrasHG/App.swift; sourceTree = "<group>"; };
+		2 /* Models.swift */ = {isa = PBXFileReference; path = GestionObrasHG/Models/Models.swift; sourceTree = "<group>"; };
+		3 /* DataController.swift */ = {isa = PBXFileReference; path = GestionObrasHG/Models/DataController.swift; sourceTree = "<group>"; };
+		4 /* ListaObrasView.swift */ = {isa = PBXFileReference; path = GestionObrasHG/Views/ListaObrasView.swift; sourceTree = "<group>"; };
+		5 /* NuevaObraView.swift */ = {isa = PBXFileReference; path = GestionObrasHG/Views/NuevaObraView.swift; sourceTree = "<group>"; };
+		6 /* DetalleObraView.swift */ = {isa = PBXFileReference; path = GestionObrasHG/Views/DetalleObraView.swift; sourceTree = "<group>"; };
+
+		10 /* GestionObrasHG.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; path = GestionObrasHG.app; sourceTree = BUILT_PRODUCTS_DIR; };
+
+		20 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			files = (1, 2, 3, 4, 5, 6);
+		};
+
+		30 /* GestionObrasHG */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 31;
+			buildPhases = (20);
+			name = GestionObrasHG;
+			productName = GestionObrasHG;
+			productReference = 10;
+			productType = "com.apple.product-type.application";
+		};
+
+		40 /* Project */ = {
+			isa = PBXProject;
+			buildConfigurationList = 41;
+			mainGroup = 50;
+			productRefGroup = 51;
+			targets = (30);
+			compatibilityVersion = "Xcode 16.0";
+		};
+
+		50 = {
+			isa = PBXGroup;
+			children = (1, 2, 3, 4, 5, 6);
+			sourceTree = "<group>";
+		};
+
+		51 = {
+			isa = PBXGroup;
+			children = (10);
+			name = Products;
+			sourceTree = "<group>";
+		};
+
+		60 = {
+			isa = XCBuildConfiguration;
+			name = Release;
+			buildSettings = {
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				SWIFT_VERSION = 5.0;
+				CODE_SIGNING_ALLOWED = NO;
+				CODE_SIGNING_REQUIRED = NO;
+			};
+		};
+	};
+	rootObject = 40;
+}
 EOF
 
-echo "✅ Proyecto GestionObrasHG creado correctamente."
+echo "✅ Proyecto Xcode válido para iOS 26 creado correctamente."
