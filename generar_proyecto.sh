@@ -218,7 +218,7 @@ EOF
 
 cd ..
 
-# ✅ Crear pbxproj válido para Xcode 16+, Swift 6 y iOS 17
+# Crear pbxproj compatible con iOS 17 y Swift 6
 cat > GestionObrasHG.xcodeproj/project.pbxproj <<'EOF'
 // !$*UTF8*$!
 {
@@ -277,7 +277,7 @@ cat > GestionObrasHG.xcodeproj/project.pbxproj <<'EOF'
             name = Release;
             buildSettings = {
                 PRODUCT_NAME = "$(TARGET_NAME)";
-                SDKROOT = iphoneos18.1;
+                SDKROOT = iphoneos17.0;
                 IPHONEOS_DEPLOYMENT_TARGET = 17.0;
                 SWIFT_VERSION = 5.8;
                 CODE_SIGNING_ALLOWED = NO;
