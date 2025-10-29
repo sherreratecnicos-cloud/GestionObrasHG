@@ -226,6 +226,10 @@ cat > GestionObrasHG.xcodeproj/xcshareddata/xcschemes/GestionObrasHG.xcscheme <<
 EOF
 
 # ---------- Variables para build y export ----------
+
+echo "🏗️  Limpiando, compilando y archivando GestionObrasHG…"
+
+# Variables del proyecto
 PROJECT="GestionObrasHG.xcodeproj"
 SCHEME="GestionObrasHG"
 CONFIGURATION="Release"
@@ -233,9 +237,11 @@ ARCHIVE_PATH="./build/GestionObrasHG.xcarchive"
 EXPORT_PATH="./build/GestionObrasHG-IPA"
 EXPORT_OPTIONS_PLIST="./build/exportOptions.plist"
 
+# Crear carpetas necesarias
+mkdir -p build
 mkdir -p "$EXPORT_PATH"
 
-# Export Options plist para .ipa sin firmar
+# ---------- Export Options plist para .ipa sin firmar ----------
 cat > "$EXPORT_OPTIONS_PLIST" <<'EOF'
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
