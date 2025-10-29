@@ -218,7 +218,7 @@ EOF
 
 cd ..
 
-# Crear pbxproj compatible con iOS 17 y Swift 6
+# Crear pbxproj con configuraciones corregidas
 cat > GestionObrasHG.xcodeproj/project.pbxproj <<'EOF'
 // !$*UTF8*$!
 {
@@ -226,6 +226,7 @@ cat > GestionObrasHG.xcodeproj/project.pbxproj <<'EOF'
     classes = {};
     objectVersion = 56;
     objects = {
+
         1 /* App.swift */ = {isa = PBXFileReference; path = GestionObrasHG/App.swift; sourceTree = "<group>"; };
         2 /* Models.swift */ = {isa = PBXFileReference; path = GestionObrasHG/Models/Models.swift; sourceTree = "<group>"; };
         3 /* DataController.swift */ = {isa = PBXFileReference; path = GestionObrasHG/Models/DataController.swift; sourceTree = "<group>"; };
@@ -250,6 +251,13 @@ cat > GestionObrasHG.xcodeproj/project.pbxproj <<'EOF'
             productType = "com.apple.product-type.application";
         };
 
+        31 = {
+            isa = XCConfigurationList;
+            buildConfigurations = (60, 61);
+            defaultConfigurationIsVisible = 0;
+            defaultConfigurationName = Release;
+        };
+
         40 /* Project */ = {
             isa = PBXProject;
             buildConfigurationList = 41;
@@ -257,6 +265,13 @@ cat > GestionObrasHG.xcodeproj/project.pbxproj <<'EOF'
             productRefGroup = 51;
             targets = (30);
             compatibilityVersion = "Xcode 16.0";
+        };
+
+        41 = {
+            isa = XCConfigurationList;
+            buildConfigurations = (60, 61);
+            defaultConfigurationIsVisible = 0;
+            defaultConfigurationName = Release;
         };
 
         50 = {
@@ -272,14 +287,33 @@ cat > GestionObrasHG.xcodeproj/project.pbxproj <<'EOF'
             sourceTree = "<group>";
         };
 
+        // Release build
         60 = {
             isa = XCBuildConfiguration;
             name = Release;
             buildSettings = {
                 PRODUCT_NAME = "$(TARGET_NAME)";
-                SDKROOT = iphoneos17.0;
+                SDKROOT = iphoneos;
                 IPHONEOS_DEPLOYMENT_TARGET = 17.0;
-                SWIFT_VERSION = 5.8;
+                SWIFT_VERSION = 6.0;
+                SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
+                SWIFT_COMPILATION_MODE = wholemodule;
+                CODE_SIGNING_ALLOWED = NO;
+                CODE_SIGNING_REQUIRED = NO;
+            };
+        };
+
+        // Debug build
+        61 = {
+            isa = XCBuildConfiguration;
+            name = Debug;
+            buildSettings = {
+                PRODUCT_NAME = "$(TARGET_NAME)";
+                SDKROOT = iphoneos;
+                IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+                SWIFT_VERSION = 6.0;
+                SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+                SWIFT_COMPILATION_MODE = incremental;
                 CODE_SIGNING_ALLOWED = NO;
                 CODE_SIGNING_REQUIRED = NO;
             };
@@ -289,4 +323,4 @@ cat > GestionObrasHG.xcodeproj/project.pbxproj <<'EOF'
 }
 EOF
 
-echo "✅ Proyecto Xcode válido para iOS 17 y Swift 6 creado correctamente."
+echo "✅ Proyecto Xcode válido para iOS 17 y Swift 6 creado correctamente con optimización ajustada para compilación y archivado."
