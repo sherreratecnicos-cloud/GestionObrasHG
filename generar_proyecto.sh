@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-echo "🏗️  Generando proyecto completo GestionObrasHG (Swift 6, iOS 17)…"
+echo "🏗️ Generando proyecto completo GestionObrasHG (Swift 6, iOS 17)…"
 
 # ---------- Limpiar ----------
 rm -rf GestionObrasHG GestionObrasHG.xcodeproj build
@@ -212,51 +212,75 @@ cat > GestionObrasHG.xcodeproj/xcshareddata/xcschemes/GestionObrasHG.xcscheme <<
 <Scheme
    LastUpgradeVersion = "1410"
    version = "1.7">
-   <BuildAction
-      parallelizeBuildables = "YES"
-      buildImplicitDependencies = "YES">
+   <BuildAction parallelizeBuildables="YES" buildImplicitDependencies="YES">
       <BuildActionEntries>
-         <BuildActionEntry
-            buildFor = "running"
-            buildableReference = {
-               BlueprintIdentifier = "30";
-               BuildableName = "GestionObrasHG.app";
-               BlueprintName = "GestionObrasHG";
-               ReferencedContainer = "container:GestionObrasHG.xcodeproj";
-            }/>
+         <BuildActionEntry buildFor="running" buildableReference="{BlueprintIdentifier=30; BuildableName=GestionObrasHG.app; BlueprintName=GestionObrasHG; ReferencedContainer=container:GestionObrasHG.xcodeproj;}"/>
       </BuildActionEntries>
    </BuildAction>
-   <LaunchAction
-      selectedDebuggerIdentifier = "Xcode.DebuggerFoundation.Debugger.LLDB"
-      selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
-      launchStyle = "0"
-      useCustomWorkingDirectory = "NO"
-      ignoresPersistentStateOnLaunch = "NO"
-      debugDocumentVersioning = "YES"
-      allowLocationSimulation = "YES">
-      <BuildableProductRunnable
-         runnableDebuggingMode = "0">
-         <BuildableReference
-            BuildableIdentifier = "primary"
-            BlueprintIdentifier = "30"
-            BuildableName = "GestionObrasHG.app"
-            BlueprintName = "GestionObrasHG"
-            ReferencedContainer = "container:GestionObrasHG.xcodeproj">
-         </BuildableReference>
+   <LaunchAction selectedDebuggerIdentifier="Xcode.DebuggerFoundation.Debugger.LLDB" selectedLauncherIdentifier="Xcode.DebuggerFoundation.Launcher.LLDB" launchStyle="0" useCustomWorkingDirectory="NO" ignoresPersistentStateOnLaunch="NO" debugDocumentVersioning="YES" allowLocationSimulation="YES">
+      <BuildableProductRunnable runnableDebuggingMode="0">
+         <BuildableReference BuildableIdentifier="primary" BlueprintIdentifier="30" BuildableName="GestionObrasHG.app" BlueprintName="GestionObrasHG" ReferencedContainer="container:GestionObrasHG.xcodeproj"/>
       </BuildableProductRunnable>
    </LaunchAction>
 </Scheme>
 EOF
 
-# ---------- Archive para cualquier dispositivo iOS ----------
-echo "🏗️  Archivando proyecto para Any iOS Device…"
+# ---------- Variables para build y export ----------
+PROJECT="GestionObrasHG.xcodeproj"
+SCHEME="GestionObrasHG"
+CONFIGURATION="Release"
+ARCHIVE_PATH="./build/GestionObrasHG.xcarchive"
+EXPORT_PATH="./build/GestionObrasHG-IPA"
+EXPORT_OPTIONS_PLIST="./build/exportOptions.plist"
 
-xcodebuild archive \
-  -project GestionObrasHG.xcodeproj \
-  -scheme GestionObrasHG \
-  -configuration Release \
+mkdir -p "$EXPORT_PATH"
+
+# Export Options plist para .ipa sin firmar
+cat > "$EXPORT_OPTIONS_PLIST" <<'EOF'
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>compileBitcode</key><false/>
+    <key>destination</key><string>export</string>
+    <key>method</key><string>development</string>
+    <key>signingStyle</key><string>none</string>
+    <key>stripSwiftSymbols</key><true/>
+    <key>thinning</key><string>&lt;none&gt;</string>
+</dict>
+</plist>
+EOF
+
+# ---------- Clean ----------
+echo "🧹 Limpiando proyecto…"
+xcodebuild clean \
+  -project "$PROJECT" \
+  -scheme "$SCHEME" \
+  -configuration "$CONFIGURATION" \
   -destination "generic/platform=iOS" \
-  -archivePath ./build/GestionObrasHG.xcarchive \
+  CODE_SIGNING_ALLOWED=NO
+
+# ---------- Build ----------
+echo "🔨 Compilando proyecto…"
+xcodebuild build \
+  -project "$PROJECT" \
+  -scheme "$SCHEME" \
+  -configuration "$CONFIGURATION" \
+  -destination "generic/platform=iOS" \
+  CODE_SIGNING_ALLOWED=NO \
+  SWIFT_VERSION=6.0 \
+  SWIFT_COMPILATION_MODE=wholemodule \
+  SWIFT_OPTIMIZATION_LEVEL=-Owholemodule \
+  SWIFT_ACTIVE_COMPILATION_CONDITIONS=SWIFTUI_PREVIEWS_DISABLED
+
+# ---------- Archive ----------
+echo "📦 Archivando proyecto…"
+xcodebuild archive \
+  -project "$PROJECT" \
+  -scheme "$SCHEME" \
+  -configuration "$CONFIGURATION" \
+  -destination "generic/platform=iOS" \
+  -archivePath "$ARCHIVE_PATH" \
   CODE_SIGNING_ALLOWED=NO \
   CODE_SIGNING_REQUIRED=NO \
   SWIFT_VERSION=6.0 \
@@ -264,4 +288,12 @@ xcodebuild archive \
   SWIFT_OPTIMIZATION_LEVEL=-Owholemodule \
   SWIFT_ACTIVE_COMPILATION_CONDITIONS=SWIFTUI_PREVIEWS_DISABLED
 
-echo "✅ Proyecto GestionObrasHG archivado correctamente en ./build/GestionObrasHG.xcarchive"
+# ---------- Export IPA ----------
+echo "📱 Exportando .ipa sin firmar…"
+xcodebuild -exportArchive \
+  -archivePath "$ARCHIVE_PATH" \
+  -exportPath "$EXPORT_PATH" \
+  -exportOptionsPlist "$EXPORT_OPTIONS_PLIST"
+
+echo "✅ Proyecto GestionObrasHG archivado en $ARCHIVE_PATH"
+echo "✅ .ipa generado en $EXPORT_PATH/GestionObrasHG.ipa (sin firmar)"
