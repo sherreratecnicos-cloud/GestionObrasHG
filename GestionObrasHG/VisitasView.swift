@@ -5,7 +5,7 @@ struct VisitasView: View {
 
     var body: some View {
         List {
-            ForEach(obra.visitas, id: \.id) { visita in
+            ForEach(Array(obra.visitas ?? []), id: \.id) { visita in
                 Text(visita.descripcion)
             }
         }
@@ -14,6 +14,7 @@ struct VisitasView: View {
 }
 
 #Preview {
-    // Vista de ejemplo sin datos reales
-    VisitasView(obra: Obra.example)
+    // Si tienes un ejemplo de Obra, úsalo; si no, comenta esta línea
+    // VisitasView(obra: Obra.example)
+    Text("Vista previa de VisitasView")
 }
