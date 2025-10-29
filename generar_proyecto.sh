@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-echo "🏗️  Generando proyecto completo GestionObrasHG..."
+echo "🏗️  Generando proyecto completo GestionObrasHG (Swift 6, iOS 17)…"
 
 # Limpiar y crear estructura
 rm -rf GestionObrasHG
@@ -10,7 +10,7 @@ mkdir -p GestionObrasHG.xcodeproj
 
 cd GestionObrasHG
 
-# Crear Package.swift actualizado a Swift 6
+# ---------- Package.swift ----------
 cat > Package.swift <<'EOF'
 // swift-tools-version:6.0
 import PackageDescription
@@ -30,7 +30,7 @@ let package = Package(
 )
 EOF
 
-# App principal
+# ---------- App principal ----------
 cat > GestionObrasHG/App.swift <<'EOF'
 import SwiftUI
 
@@ -47,7 +47,7 @@ struct GestionObrasHGApp: App {
 }
 EOF
 
-# Modelos
+# ---------- Modelos ----------
 cat > GestionObrasHG/Models/Models.swift <<'EOF'
 import Foundation
 import SwiftUI
@@ -74,7 +74,7 @@ struct Anotacion: Identifiable, Codable {
 }
 EOF
 
-# Controlador de datos
+# ---------- Controlador de datos ----------
 cat > GestionObrasHG/Models/DataController.swift <<'EOF'
 import Foundation
 import SwiftUI
@@ -118,7 +118,7 @@ class DataController: ObservableObject {
 }
 EOF
 
-# Vista principal
+# ---------- Vista principal ----------
 cat > GestionObrasHG/Views/ListaObrasView.swift <<'EOF'
 import SwiftUI
 
@@ -156,7 +156,7 @@ struct ListaObrasView: View {
 }
 EOF
 
-# Nueva obra
+# ---------- Nueva obra ----------
 cat > GestionObrasHG/Views/NuevaObraView.swift <<'EOF'
 import SwiftUI
 
@@ -192,7 +192,7 @@ struct NuevaObraView: View {
 }
 EOF
 
-# Detalle de obra
+# ---------- Detalle de obra ----------
 cat > GestionObrasHG/Views/DetalleObraView.swift <<'EOF'
 import SwiftUI
 
@@ -218,7 +218,7 @@ EOF
 
 cd ..
 
-# Crear pbxproj con configuraciones corregidas
+# ---------- Proyecto Xcode ----------
 cat > GestionObrasHG.xcodeproj/project.pbxproj <<'EOF'
 // !$*UTF8*$!
 {
@@ -227,21 +227,18 @@ cat > GestionObrasHG.xcodeproj/project.pbxproj <<'EOF'
     objectVersion = 56;
     objects = {
 
-        1 /* App.swift */ = {isa = PBXFileReference; path = GestionObrasHG/App.swift; sourceTree = "<group>"; };
-        2 /* Models.swift */ = {isa = PBXFileReference; path = GestionObrasHG/Models/Models.swift; sourceTree = "<group>"; };
-        3 /* DataController.swift */ = {isa = PBXFileReference; path = GestionObrasHG/Models/DataController.swift; sourceTree = "<group>"; };
-        4 /* ListaObrasView.swift */ = {isa = PBXFileReference; path = GestionObrasHG/Views/ListaObrasView.swift; sourceTree = "<group>"; };
-        5 /* NuevaObraView.swift */ = {isa = PBXFileReference; path = GestionObrasHG/Views/NuevaObraView.swift; sourceTree = "<group>"; };
-        6 /* DetalleObraView.swift */ = {isa = PBXFileReference; path = GestionObrasHG/Views/DetalleObraView.swift; sourceTree = "<group>"; };
+        1 = {isa = PBXFileReference; path = GestionObrasHG/App.swift; sourceTree = "<group>"; };
+        2 = {isa = PBXFileReference; path = GestionObrasHG/Models/Models.swift; sourceTree = "<group>"; };
+        3 = {isa = PBXFileReference; path = GestionObrasHG/Models/DataController.swift; sourceTree = "<group>"; };
+        4 = {isa = PBXFileReference; path = GestionObrasHG/Views/ListaObrasView.swift; sourceTree = "<group>"; };
+        5 = {isa = PBXFileReference; path = GestionObrasHG/Views/NuevaObraView.swift; sourceTree = "<group>"; };
+        6 = {isa = PBXFileReference; path = GestionObrasHG/Views/DetalleObraView.swift; sourceTree = "<group>"; };
 
-        10 /* GestionObrasHG.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; path = GestionObrasHG.app; sourceTree = BUILT_PRODUCTS_DIR; };
+        10 = {isa = PBXFileReference; explicitFileType = wrapper.application; path = GestionObrasHG.app; sourceTree = BUILT_PRODUCTS_DIR; };
 
-        20 /* Sources */ = {
-            isa = PBXSourcesBuildPhase;
-            files = (1, 2, 3, 4, 5, 6);
-        };
+        20 = {isa = PBXSourcesBuildPhase; files = (1, 2, 3, 4, 5, 6); };
 
-        30 /* GestionObrasHG */ = {
+        30 = {
             isa = PBXNativeTarget;
             buildConfigurationList = 31;
             buildPhases = (20);
@@ -254,11 +251,10 @@ cat > GestionObrasHG.xcodeproj/project.pbxproj <<'EOF'
         31 = {
             isa = XCConfigurationList;
             buildConfigurations = (60, 61);
-            defaultConfigurationIsVisible = 0;
             defaultConfigurationName = Release;
         };
 
-        40 /* Project */ = {
+        40 = {
             isa = PBXProject;
             buildConfigurationList = 41;
             mainGroup = 50;
@@ -270,24 +266,13 @@ cat > GestionObrasHG.xcodeproj/project.pbxproj <<'EOF'
         41 = {
             isa = XCConfigurationList;
             buildConfigurations = (60, 61);
-            defaultConfigurationIsVisible = 0;
             defaultConfigurationName = Release;
         };
 
-        50 = {
-            isa = PBXGroup;
-            children = (1, 2, 3, 4, 5, 6);
-            sourceTree = "<group>";
-        };
+        50 = {isa = PBXGroup; children = (1, 2, 3, 4, 5, 6); sourceTree = "<group>"; };
+        51 = {isa = PBXGroup; children = (10); name = Products; sourceTree = "<group>"; };
 
-        51 = {
-            isa = PBXGroup;
-            children = (10);
-            name = Products;
-            sourceTree = "<group>";
-        };
-
-        // Release build
+        // Release build configuration
         60 = {
             isa = XCBuildConfiguration;
             name = Release;
@@ -296,14 +281,15 @@ cat > GestionObrasHG.xcodeproj/project.pbxproj <<'EOF'
                 SDKROOT = iphoneos;
                 IPHONEOS_DEPLOYMENT_TARGET = 17.0;
                 SWIFT_VERSION = 6.0;
-                SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
+                SWIFT_OPTIMIZATION_LEVEL = "$(inherited)";
                 SWIFT_COMPILATION_MODE = wholemodule;
+                SWIFT_ACTIVE_COMPILATION_CONDITIONS = "SWIFTUI_PREVIEWS_DISABLED";
                 CODE_SIGNING_ALLOWED = NO;
                 CODE_SIGNING_REQUIRED = NO;
             };
         };
 
-        // Debug build
+        // Debug build configuration
         61 = {
             isa = XCBuildConfiguration;
             name = Debug;
@@ -323,4 +309,4 @@ cat > GestionObrasHG.xcodeproj/project.pbxproj <<'EOF'
 }
 EOF
 
-echo "✅ Proyecto Xcode válido para iOS 17 y Swift 6 creado correctamente con optimización ajustada para compilación y archivado."
+echo "✅ Proyecto Xcode listo (Swift 6, iOS 17, sin conflicto de Previews)."
