@@ -36,6 +36,7 @@ jobs:
             developmentRegion: es
           configs:
             Release: release
+            Debug: debug
           targets:
             GestionObrasHG:
               type: application
@@ -44,7 +45,13 @@ jobs:
                 - path: GestionObrasHG
               settings:
                 BASE_SDK: iphoneos
+                IPHONEOS_DEPLOYMENT_TARGET: 17.0
+                SWIFT_VERSION: 6.0
+                SWIFT_COMPILATION_MODE: wholemodule
+                SWIFT_OPTIMIZATION_LEVEL: "-Owholemodule"
+                SWIFT_ACTIVE_COMPILATION_CONDITIONS: "SWIFTUI_PREVIEWS_DISABLED"
                 CODE_SIGNING_ALLOWED: NO
+                CODE_SIGNING_REQUIRED: NO
           EOF
 
           # Generar .xcodeproj
@@ -56,30 +63,25 @@ jobs:
             -project GestionObrasHG.xcodeproj \
             -scheme GestionObrasHG \
             -configuration Release \
-            CODE_SIGNING_ALLOWED=NO
+            CODE_SIGNING_ALLOWED=NO \
+            SWIFT_COMPILATION_MODE=wholemodule \
+            SWIFT_OPTIMIZATION_LEVEL='-Owholemodule'
 
-- name: Build & Archive GestionObrasHG
-  run: |
-    xcodebuild \
-      -scheme GestionObrasHG \
-      -configuration Release \
-      -destination 'generic/platform=iOS' \
-      -archivePath build/GestionObrasHG.xcarchive \
-      clean archive \
-      SWIFT_COMPILATION_MODE=wholemodule \
-      SWIFT_OPTIMIZATION_LEVEL='-Owholemodule' \
-      SWIFT_ACTIVE_COMPILATION_CONDITIONS='SWIFTUI_PREVIEWS_DISABLED'
-
-
-      - name: Archive app
+      - name: Build & Archive GestionObrasHG
         run: |
           mkdir -p build
           xcodebuild archive \
             -project GestionObrasHG.xcodeproj \
             -scheme GestionObrasHG \
             -configuration Release \
+            -destination 'generic/platform=iOS' \
             -archivePath ./build/GestionObrasHG.xcarchive \
-            CODE_SIGNING_ALLOWED=NO
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            SWIFT_VERSION=6.0 \
+            SWIFT_COMPILATION_MODE=wholemodule \
+            SWIFT_OPTIMIZATION_LEVEL='-Owholemodule' \
+            SWIFT_ACTIVE_COMPILATION_CONDITIONS='SWIFTUI_PREVIEWS_DISABLED'
 
       - name: Export IPA
         run: |
@@ -99,7 +101,9 @@ jobs:
           xcodebuild -exportArchive \
             -archivePath ./build/GestionObrasHG.xcarchive \
             -exportOptionsPlist ExportOptions.plist \
-            -exportPath ./build/ipa
+            -exportPath ./build/ipa \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO
 
       - name: Upload IPA
         uses: actions/upload-artifact@v4
