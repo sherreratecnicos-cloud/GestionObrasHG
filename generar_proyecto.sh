@@ -4,8 +4,9 @@ set -e
 echo "🏗️  Generando proyecto completo GestionObrasHG (Swift 6, iOS 17)…"
 
 # ---------- Limpiar ----------
-rm -rf GestionObrasHG GestionObrasHG.xcodeproj
+rm -rf GestionObrasHG GestionObrasHG.xcodeproj build
 mkdir -p GestionObrasHG/GestionObrasHG/{Models,Views,Assets.xcassets,Resources,PDFs}
+mkdir -p build
 
 cd GestionObrasHG
 
@@ -203,9 +204,7 @@ EOF
 
 cd ..
 
-# ---------- Crear esquema compartido y destino para Xcodebuild ----------
-# Creamos un archivo de esquema mínimo que Xcode reconocerá
-
+# ---------- Crear esquema compartido ----------
 mkdir -p GestionObrasHG.xcodeproj/xcshareddata/xcschemes
 
 cat > GestionObrasHG.xcodeproj/xcshareddata/xcschemes/GestionObrasHG.xcscheme <<'EOF'
@@ -249,6 +248,20 @@ cat > GestionObrasHG.xcodeproj/xcshareddata/xcschemes/GestionObrasHG.xcscheme <<
 </Scheme>
 EOF
 
-echo "✅ Proyecto GestionObrasHG listo con esquema compartido."
-echo "Ahora puedes ejecutar, por ejemplo:"
-echo "   xcodebuild clean -project GestionObrasHG.xcodeproj -scheme GestionObrasHG -destination 'platform=iOS Simulator,name=iPhone 14,OS=17.0'"
+# ---------- Archive para cualquier dispositivo iOS ----------
+echo "🏗️  Archivando proyecto para Any iOS Device…"
+
+xcodebuild archive \
+  -project GestionObrasHG.xcodeproj \
+  -scheme GestionObrasHG \
+  -configuration Release \
+  -destination "generic/platform=iOS" \
+  -archivePath ./build/GestionObrasHG.xcarchive \
+  CODE_SIGNING_ALLOWED=NO \
+  CODE_SIGNING_REQUIRED=NO \
+  SWIFT_VERSION=6.0 \
+  SWIFT_COMPILATION_MODE=wholemodule \
+  SWIFT_OPTIMIZATION_LEVEL=-Owholemodule \
+  SWIFT_ACTIVE_COMPILATION_CONDITIONS=SWIFTUI_PREVIEWS_DISABLED
+
+echo "✅ Proyecto GestionObrasHG archivado correctamente en ./build/GestionObrasHG.xcarchive"
