@@ -1,19 +1,21 @@
 import SwiftUI
 
 struct VisitaDetailView: View {
-    @ObservedObject var visita: Visita
+    var visita: Visita
 
     var body: some View {
-        List {
-            Section("Anotaciones") {
-                NavigationLink("Ver Anotaciones") {
-                    AnotacionesView(visita: visita)
-                }
-                NavigationLink("Añadir Anotación") {
-                    AddAnotacionView(visita: visita)
-                }
-            }
+        VStack(spacing: 16) {
+            Text("Detalle de visita")
+                .font(.title2)
+                .bold()
+
+            Text(visita.descripcion)
+                .font(.body)
+                .padding()
+
+            // 🔧 Temporal: sustituir cuando implementes AnotacionesView
+            Text("Sección de anotaciones pendiente de implementar")
         }
-        .navigationTitle(visita.fecha?.description ?? "")
+        .navigationTitle("Visita")
     }
 }
