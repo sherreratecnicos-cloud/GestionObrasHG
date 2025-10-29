@@ -3,10 +3,9 @@ set -e
 
 echo "🏗️  Generando proyecto completo GestionObrasHG (Swift 6, iOS 17)…"
 
-# Limpiar y crear estructura
-rm -rf GestionObrasHG
+# ---------- Limpiar ----------
+rm -rf GestionObrasHG GestionObrasHG.xcodeproj
 mkdir -p GestionObrasHG/GestionObrasHG/{Models,Views,Assets.xcassets,Resources,PDFs}
-mkdir -p GestionObrasHG.xcodeproj
 
 cd GestionObrasHG
 
@@ -30,7 +29,7 @@ let package = Package(
 )
 EOF
 
-# ---------- App principal ----------
+# ---------- App.swift ----------
 cat > GestionObrasHG/App.swift <<'EOF'
 import SwiftUI
 
@@ -47,7 +46,7 @@ struct GestionObrasHGApp: App {
 }
 EOF
 
-# ---------- Modelos ----------
+# ---------- Models ----------
 cat > GestionObrasHG/Models/Models.swift <<'EOF'
 import Foundation
 import SwiftUI
@@ -74,7 +73,6 @@ struct Anotacion: Identifiable, Codable {
 }
 EOF
 
-# ---------- Controlador de datos ----------
 cat > GestionObrasHG/Models/DataController.swift <<'EOF'
 import Foundation
 import SwiftUI
@@ -83,9 +81,7 @@ class DataController: ObservableObject {
     @Published var obras: [Obra] = []
     private let saveKey = "obrasGuardadas.json"
 
-    init() {
-        load()
-    }
+    init() { load() }
 
     func load() {
         let url = getDocumentsDirectory().appendingPathComponent(saveKey)
@@ -118,7 +114,7 @@ class DataController: ObservableObject {
 }
 EOF
 
-# ---------- Vista principal ----------
+# ---------- Views ----------
 cat > GestionObrasHG/Views/ListaObrasView.swift <<'EOF'
 import SwiftUI
 
@@ -132,11 +128,8 @@ struct ListaObrasView: View {
                 ForEach(data.obras) { obra in
                     NavigationLink(destination: DetalleObraView(obra: obra)) {
                         VStack(alignment: .leading) {
-                            Text(obra.nombre)
-                                .font(.headline)
-                            Text(obra.direccion)
-                                .font(.subheadline)
-                                .foregroundColor(.gray)
+                            Text(obra.nombre).font(.headline)
+                            Text(obra.direccion).font(.subheadline).foregroundColor(.gray)
                         }
                     }
                 }
@@ -148,15 +141,12 @@ struct ListaObrasView: View {
                     Label("Nueva Obra", systemImage: "plus.circle.fill")
                 }
             }
-            .sheet(isPresented: $showingAddObra) {
-                NuevaObraView()
-            }
+            .sheet(isPresented: $showingAddObra) { NuevaObraView() }
         }
     }
 }
 EOF
 
-# ---------- Nueva obra ----------
 cat > GestionObrasHG/Views/NuevaObraView.swift <<'EOF'
 import SwiftUI
 
@@ -182,9 +172,7 @@ struct NuevaObraView: View {
                     }
                 }
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancelar", role: .cancel) {
-                        dismiss()
-                    }
+                    Button("Cancelar", role: .cancel) { dismiss() }
                 }
             }
         }
@@ -192,7 +180,6 @@ struct NuevaObraView: View {
 }
 EOF
 
-# ---------- Detalle de obra ----------
 cat > GestionObrasHG/Views/DetalleObraView.swift <<'EOF'
 import SwiftUI
 
@@ -202,9 +189,7 @@ struct DetalleObraView: View {
     var body: some View {
         VStack {
             if obra.visitas.isEmpty {
-                Text("Sin visitas registradas")
-                    .foregroundColor(.gray)
-                    .padding()
+                Text("Sin visitas registradas").foregroundColor(.gray).padding()
             } else {
                 List(obra.visitas) { visita in
                     Text(visita.descripcion)
@@ -218,95 +203,52 @@ EOF
 
 cd ..
 
-# ---------- Proyecto Xcode ----------
-cat > GestionObrasHG.xcodeproj/project.pbxproj <<'EOF'
-// !$*UTF8*$!
-{
-    archiveVersion = 1;
-    classes = {};
-    objectVersion = 56;
-    objects = {
+# ---------- Crear esquema compartido y destino para Xcodebuild ----------
+# Creamos un archivo de esquema mínimo que Xcode reconocerá
 
-        1 = {isa = PBXFileReference; path = GestionObrasHG/App.swift; sourceTree = "<group>"; };
-        2 = {isa = PBXFileReference; path = GestionObrasHG/Models/Models.swift; sourceTree = "<group>"; };
-        3 = {isa = PBXFileReference; path = GestionObrasHG/Models/DataController.swift; sourceTree = "<group>"; };
-        4 = {isa = PBXFileReference; path = GestionObrasHG/Views/ListaObrasView.swift; sourceTree = "<group>"; };
-        5 = {isa = PBXFileReference; path = GestionObrasHG/Views/NuevaObraView.swift; sourceTree = "<group>"; };
-        6 = {isa = PBXFileReference; path = GestionObrasHG/Views/DetalleObraView.swift; sourceTree = "<group>"; };
+mkdir -p GestionObrasHG.xcodeproj/xcshareddata/xcschemes
 
-        10 = {isa = PBXFileReference; explicitFileType = wrapper.application; path = GestionObrasHG.app; sourceTree = BUILT_PRODUCTS_DIR; };
-
-        20 = {isa = PBXSourcesBuildPhase; files = (1, 2, 3, 4, 5, 6); };
-
-        30 = {
-            isa = PBXNativeTarget;
-            buildConfigurationList = 31;
-            buildPhases = (20);
-            name = GestionObrasHG;
-            productName = GestionObrasHG;
-            productReference = 10;
-            productType = "com.apple.product-type.application";
-        };
-
-        31 = {
-            isa = XCConfigurationList;
-            buildConfigurations = (60, 61);
-            defaultConfigurationName = Release;
-        };
-
-        40 = {
-            isa = PBXProject;
-            buildConfigurationList = 41;
-            mainGroup = 50;
-            productRefGroup = 51;
-            targets = (30);
-            compatibilityVersion = "Xcode 16.0";
-        };
-
-        41 = {
-            isa = XCConfigurationList;
-            buildConfigurations = (60, 61);
-            defaultConfigurationName = Release;
-        };
-
-        50 = {isa = PBXGroup; children = (1, 2, 3, 4, 5, 6); sourceTree = "<group>"; };
-        51 = {isa = PBXGroup; children = (10); name = Products; sourceTree = "<group>"; };
-
-        // Release build configuration
-        60 = {
-            isa = XCBuildConfiguration;
-            name = Release;
-            buildSettings = {
-                PRODUCT_NAME = "$(TARGET_NAME)";
-                SDKROOT = iphoneos;
-                IPHONEOS_DEPLOYMENT_TARGET = 17.0;
-                SWIFT_VERSION = 6.0;
-                SWIFT_OPTIMIZATION_LEVEL = "$(inherited)";
-                SWIFT_COMPILATION_MODE = wholemodule;
-                SWIFT_ACTIVE_COMPILATION_CONDITIONS = "SWIFTUI_PREVIEWS_DISABLED";
-                CODE_SIGNING_ALLOWED = NO;
-                CODE_SIGNING_REQUIRED = NO;
-            };
-        };
-
-        // Debug build configuration
-        61 = {
-            isa = XCBuildConfiguration;
-            name = Debug;
-            buildSettings = {
-                PRODUCT_NAME = "$(TARGET_NAME)";
-                SDKROOT = iphoneos;
-                IPHONEOS_DEPLOYMENT_TARGET = 17.0;
-                SWIFT_VERSION = 6.0;
-                SWIFT_OPTIMIZATION_LEVEL = "-Onone";
-                SWIFT_COMPILATION_MODE = incremental;
-                CODE_SIGNING_ALLOWED = NO;
-                CODE_SIGNING_REQUIRED = NO;
-            };
-        };
-    };
-    rootObject = 40;
-}
+cat > GestionObrasHG.xcodeproj/xcshareddata/xcschemes/GestionObrasHG.xcscheme <<'EOF'
+<?xml version="1.0" encoding="UTF-8"?>
+<Scheme
+   LastUpgradeVersion = "1410"
+   version = "1.7">
+   <BuildAction
+      parallelizeBuildables = "YES"
+      buildImplicitDependencies = "YES">
+      <BuildActionEntries>
+         <BuildActionEntry
+            buildFor = "running"
+            buildableReference = {
+               BlueprintIdentifier = "30";
+               BuildableName = "GestionObrasHG.app";
+               BlueprintName = "GestionObrasHG";
+               ReferencedContainer = "container:GestionObrasHG.xcodeproj";
+            }/>
+      </BuildActionEntries>
+   </BuildAction>
+   <LaunchAction
+      selectedDebuggerIdentifier = "Xcode.DebuggerFoundation.Debugger.LLDB"
+      selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
+      launchStyle = "0"
+      useCustomWorkingDirectory = "NO"
+      ignoresPersistentStateOnLaunch = "NO"
+      debugDocumentVersioning = "YES"
+      allowLocationSimulation = "YES">
+      <BuildableProductRunnable
+         runnableDebuggingMode = "0">
+         <BuildableReference
+            BuildableIdentifier = "primary"
+            BlueprintIdentifier = "30"
+            BuildableName = "GestionObrasHG.app"
+            BlueprintName = "GestionObrasHG"
+            ReferencedContainer = "container:GestionObrasHG.xcodeproj">
+         </BuildableReference>
+      </BuildableProductRunnable>
+   </LaunchAction>
+</Scheme>
 EOF
 
-echo "✅ Proyecto Xcode listo (Swift 6, iOS 17, sin conflicto de Previews)."
+echo "✅ Proyecto GestionObrasHG listo con esquema compartido."
+echo "Ahora puedes ejecutar, por ejemplo:"
+echo "   xcodebuild clean -project GestionObrasHG.xcodeproj -scheme GestionObrasHG -destination 'platform=iOS Simulator,name=iPhone 14,OS=17.0'"
